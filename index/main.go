@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/0xSequence/chainalysis"
+	"github.com/0xsequence/chainalysis"
 )
 
 func main() {

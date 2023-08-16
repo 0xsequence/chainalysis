@@ -3,15 +3,15 @@ package main
 import (
 	"fmt"
 
-	"github.com/0xSequence/chainalysis"
+	"github.com/0xsequence/chainalysis"
 )
 
 func main() {
-	localChainAlysis, err := chainalysis.NewLocalChainAlysis()
+	localChainAlysis, err := chainalysis.NewLocalChainalysis()
 	if err != nil {
 		panic(err)
 	}
-	onChainAlysis, err := chainalysis.NewOnChainAlysis()
+	onChainAlysis, err := chainalysis.NewOnChainalysis()
 	if err != nil {
 		panic(err)
 	}

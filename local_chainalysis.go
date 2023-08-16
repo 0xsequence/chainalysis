@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"io"
+	"net/http"
 	"os"
 
 	"github.com/0xsequence/ethkit/ethcoder"
@@ -13,8 +14,7 @@ import (
 	"github.com/0xsequence/go-sequence/lib/prototyp"
 )
 
-//go:embed data/sanctioned_addresses.json
-var sanctionedAddressesFile []byte
+const sanctionedAddressesSource = "https://raw.githubusercontent.com/0xsequence/chainalysis/master/index/sanctioned_addresses.json"
 
 type sanctionedAddressEvent struct {
 	BlockNum  uint64          `json:"blockNum"`
@@ -22,15 +22,14 @@ type sanctionedAddressEvent struct {
 	Addrs     []prototyp.Hash `json:"addrs"`
 }
 
-type localChainAnlysis struct {
+type localChainalysis struct {
 	SanctionedAddresses map[string]struct{}
 }
 
-func NewLocalChainAlysis() (ChainAlysis, error) {
-	var sanctionedAddresses map[string]struct{} = nil
-	sanctionedAddressEvents := []sanctionedAddressEvent{}
+func NewLocalChainalysis() (Chainalysis, error) {
+	sanctionedAddresses := map[string]struct{}{}
 
-	err := json.Unmarshal(sanctionedAddressesFile, &sanctionedAddressEvents)
+	sanctionedAddressEvents, err := fetchSanctionedAddressEventsFromSource(sanctionedAddressesSource)
 	if err != nil {
 		return nil, err
 	}
@@ -41,13 +40,13 @@ func NewLocalChainAlysis() (ChainAlysis, error) {
 		}
 	}
 
-	return &localChainAnlysis{
+	return &localChainalysis{
 		SanctionedAddresses: sanctionedAddresses,
 	}, nil
 }
 
-func (l *localChainAnlysis) IsSanctioned(address string) (bool, error) {
-	formattedAddress := common.HexToAddress(address).Hex()
+func (l *localChainalysis) IsSanctioned(address string) (bool, error) {
+	formattedAddress := prototyp.HashFromString(address).String()
 	_, ok := l.SanctionedAddresses[formattedAddress]
 	return ok, nil
 }
@@ -77,7 +76,7 @@ func FetchAndUpdateSanctionedAddresses(file *os.File, startingBlock uint64, endi
 		}
 	}
 
-	newEvents, err := FetchSanctionedAddressEvents(startingBlock, endingBlock)
+	newEvents, err := fetchSanctionedAddressEvents(startingBlock, endingBlock)
 	if err != nil {
 		return err
 	}
@@ -95,10 +94,10 @@ func FetchAndUpdateSanctionedAddresses(file *os.File, startingBlock uint64, endi
 	return nil
 }
 
-func FetchSanctionedAddressEvents(startingBlock uint64, endingBlock uint64) ([]sanctionedAddressEvent, error) {
+func fetchSanctionedAddressEvents(startingBlock uint64, endingBlock uint64) ([]sanctionedAddressEvent, error) {
 	provider, err := ethrpc.NewProvider("https://nodes.sequence.app/mainnet")
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	result := []sanctionedAddressEvent{}
@@ -128,4 +127,22 @@ func FetchSanctionedAddressEvents(startingBlock uint64, endingBlock uint64) ([]s
 	}
 
 	return result, nil
+}
+
+func fetchSanctionedAddressEventsFromSource(source string) ([]sanctionedAddressEvent, error) {
+	res, err := http.DefaultClient.Get(source)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	buf, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	events := []sanctionedAddressEvent{}
+	err = json.Unmarshal(buf, &events)
+	if err != nil {
+		return nil, err
+	}
+	return events, nil
 }

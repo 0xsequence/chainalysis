@@ -1,4 +1,4 @@
-module github.com/0xSequence/chainalysis
+module github.com/0xsequence/chainalysis
 
 go 1.21.0
 
