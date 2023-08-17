@@ -1,13 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/0xsequence/chainalysis"
 )
 
 func main() {
-	localChainAlysis, err := chainalysis.NewLocalChainalysis()
+	localChainAlysis, err := chainalysis.NewLocalChainalysis(context.Background())
 	if err != nil {
 		panic(err)
 	}
