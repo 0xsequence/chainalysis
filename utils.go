@@ -5,11 +5,14 @@ import (
 	"errors"
 	"math/big"
 	"strings"
+	"time"
 
 	"github.com/0xsequence/ethkit/ethrpc"
 	"github.com/0xsequence/ethkit/go-ethereum"
 	"github.com/0xsequence/ethkit/go-ethereum/common"
 	"github.com/0xsequence/ethkit/go-ethereum/core/types"
+	"github.com/goware/breaker"
+	"github.com/goware/logadapter-zerolog"
 	"github.com/rs/zerolog/log"
 )
 
@@ -18,6 +21,8 @@ func fetchEthereumLogs(ctx context.Context, provider ethrpc.Interface, maxBatchS
 
 	batchSize := lastBatchSize
 	additiveFactor := uint64(float64(batchSize) * 0.10)
+
+	br := breaker.New(logadapter.LogAdapter(log.Logger), time.Second*2, 2, 5)
 
 	for i := from; i < to; {
 		dst := min(i+batchSize, to)
@@ -33,17 +38,29 @@ func fetchEthereumLogs(ctx context.Context, provider ethrpc.Interface, maxBatchS
 			query.Addresses = []common.Address{*optContractFilter}
 		}
 
-		logs, err := provider.FilterLogs(ctx, query)
+		var logs []types.Log
+
+		err := br.Do(ctx, func() error {
+			var err error
+			logs, err = provider.FilterLogs(ctx, query)
+			if err != nil {
+				if tooMuchDataRequestedError(err) {
+					log.Warn().Msgf("fetchEthereumLogs hit too-much-data error for batchSize %d", batchSize)
+					batchSize = uint64(float64(batchSize) / 1.5)
+					return err
+				}
+
+				if !errors.Is(err, context.Canceled) {
+					log.Err(err).Msgf("fetchEthereumLogs failed")
+				}
+
+				log.Warn().Msgf("fetchEthereumLogs error '%v'", err)
+				return err
+			}
+			return nil
+		})
+
 		if err != nil {
-			if tooMuchDataRequestedError(err) {
-				log.Warn().Msgf("fetchEthereumLogs hit too-much-data error for batchSize %d", batchSize)
-				batchSize = uint64(float64(batchSize) / 1.5)
-				continue
-			}
-			if !errors.Is(err, context.Canceled) {
-				log.Err(err).Msgf("fetchEthereumLogs failed")
-			}
-			log.Warn().Msgf("fetchEthereumLogs error '%v'", err)
 			return nil, batchSize, err
 		}
 

@@ -31,6 +31,8 @@ github.com/gorilla/websocket v1.5.0 h1:PPwGk2jz7EePpoHN/+ClbZu8SPxiqlu12wZP/3sWm
 github.com/gorilla/websocket v1.5.0/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/goware/breaker v0.1.2 h1:er7Jo7OAUdKyN0iXBQGI2x18MiXjTKNaE4P+ceimNzE=
 github.com/goware/breaker v0.1.2/go.mod h1:ijCEfXAa0j6w7IoHA4v6Sox2W6U9HUbI/t+5x0zGaug=
+github.com/goware/logadapter-zerolog v0.1.0 h1:OU/Zn3M4CIJEwZsn5DYzkr/1OiRpA4IOhbRuPjUH6yQ=
+github.com/goware/logadapter-zerolog v0.1.0/go.mod h1:+8RRtDTrd1cr5yZCuECvYHl0OwxBHMU4hHoL4uvl/2A=
 github.com/goware/logger v0.1.0 h1:VB38nDsvhqPIRom/xi2iA3wq8WJRqwQx9liNT1PLGF8=
 github.com/goware/logger v0.1.0/go.mod h1:IC34c5H56R1I4/R/d51aQhzHsjSJqkQyIHyuJxOiu0w=
 github.com/goware/superr v0.0.2 h1:71xI6ojd+YXyq2RamI8lMpkYTNoErI5Uyrv8vFAPr1U=

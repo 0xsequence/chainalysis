@@ -5,6 +5,8 @@ go 1.21.0
 require (
 	github.com/0xsequence/ethkit v1.21.2
 	github.com/0xsequence/go-sequence v0.22.0
+	github.com/goware/breaker v0.1.2
+	github.com/goware/logadapter-zerolog v0.1.0
 	github.com/rs/zerolog v1.30.0
 )
 
@@ -15,7 +17,6 @@ require (
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
-	github.com/goware/breaker v0.1.2 // indirect
 	github.com/goware/logger v0.1.0 // indirect
 	github.com/goware/superr v0.0.2 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

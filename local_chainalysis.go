@@ -14,7 +14,7 @@ import (
 	"github.com/0xsequence/go-sequence/lib/prototyp"
 )
 
-const sanctionedAddressesSource = "https://raw.githubusercontent.com/0xsequence/chainalysis/master/index/sanctioned_addresses.json"
+const sanctionedAddressesSource = "https://raw.githubusercontent.com/0xsequence/chainalysis/initial-version/index/sanctioned_addresses.json"
 
 type sanctionedAddressEvent struct {
 	BlockNum  uint64          `json:"blockNum"`
