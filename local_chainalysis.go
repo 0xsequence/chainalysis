@@ -2,7 +2,9 @@ package chainalysis
 
 import (
 	"context"
+	"fmt"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/0xsequence/go-sequence/lib/prototyp"
@@ -18,11 +20,15 @@ type sanctionedAddressEvent struct {
 }
 
 type localChainalysis struct {
+	running int32
+	ctx     context.Context
+	stop    context.CancelFunc
+
 	mu                  sync.RWMutex
 	SanctionedAddresses map[string]struct{}
 }
 
-func NewLocalChainalysis(ctx context.Context) (Chainalysis, error) {
+func NewLocalChainalysis() (Chainalysis, error) {
 	sanctionedAddresses := map[string]struct{}{}
 
 	sanctionedAddressEvents, err := fetchSanctionedAddressEventsFromSource(sanctionedAddressesSource)
@@ -40,9 +46,34 @@ func NewLocalChainalysis(ctx context.Context) (Chainalysis, error) {
 		SanctionedAddresses: sanctionedAddresses,
 	}
 
-	go lc.fetcher(ctx)
-
 	return lc, nil
+}
+
+func (l *localChainalysis) Run(ctx context.Context) error {
+	if l.IsRunning() {
+		return fmt.Errorf("chainalysis: already running")
+	}
+
+	atomic.StoreInt32(&l.running, 1)
+
+	l.ctx, l.stop = context.WithCancel(ctx)
+
+	return l.fetcher(ctx)
+}
+
+func (l *localChainalysis) Stop() error {
+	if !l.IsRunning() {
+		return fmt.Errorf("chainalysis: not running")
+	}
+
+	atomic.StoreInt32(&l.running, 0)
+
+	l.stop()
+	return nil
+}
+
+func (l *localChainalysis) IsRunning() bool {
+	return atomic.LoadInt32(&l.running) == 1
 }
 
 func (l *localChainalysis) IsSanctioned(address string) (bool, error) {
@@ -53,14 +84,14 @@ func (l *localChainalysis) IsSanctioned(address string) (bool, error) {
 	return ok, nil
 }
 
-func (l *localChainalysis) fetcher(ctx context.Context) {
-	ticker := time.NewTicker(10 * time.Second)
+func (l *localChainalysis) fetcher(ctx context.Context) error {
+	ticker := time.NewTicker(5 * time.Minute)
 	defer ticker.Stop()
 
 	for {
 		select {
 		case <-ctx.Done():
-			return
+			return nil
 		case <-ticker.C:
 			sanctionedAddressesFromSource, err := fetchSanctionedAddressEventsFromSource(sanctionedAddressesSource)
 			if err != nil {

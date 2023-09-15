@@ -1,6 +1,6 @@
 module github.com/0xsequence/chainalysis
 
-go 1.21.0
+go 1.20
 
 require (
 	github.com/0xsequence/ethkit v1.21.2

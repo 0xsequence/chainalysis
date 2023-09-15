@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 
 	"github.com/0xsequence/chainalysis"
@@ -9,7 +10,7 @@ import (
 func main() {
 	file, err := os.OpenFile("sanctioned_addresses.json", os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	defer file.Close()
 	chainalysis.FetchAndUpdateSanctionedAddresses(file, 16734673, 17118381)
