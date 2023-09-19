@@ -2,10 +2,6 @@ package chainalysis
 
 import (
 	"context"
-	"encoding/json"
-	"io"
-	"net/http"
-	"os"
 
 	"github.com/0xsequence/ethkit/ethcoder"
 	"github.com/0xsequence/ethkit/ethrpc"
@@ -13,20 +9,10 @@ import (
 	"github.com/0xsequence/go-sequence/lib/prototyp"
 )
 
-func FetchAndUpdateSanctionedAddresses(file *os.File, startingBlock uint64, endingBlock uint64) error {
-	fileData, err := io.ReadAll(file)
+func FetchAndUpdateSanctionedAddresses(ctx context.Context, provider *ethrpc.Provider, source IndexSource, startingBlock uint64, endingBlock uint64) error {
+	preFetchedEvents, err := source.FetchSanctionedAddressEvents()
 	if err != nil {
 		return err
-	}
-
-	preFetchedEvents := []sanctionedAddressEvent{}
-
-	if len(fileData) > 0 {
-		err = json.Unmarshal(fileData, &preFetchedEvents)
-
-		if err != nil {
-			return err
-		}
 	}
 
 	if len(preFetchedEvents) > 0 {
@@ -38,34 +24,25 @@ func FetchAndUpdateSanctionedAddresses(file *os.File, startingBlock uint64, endi
 		}
 	}
 
-	newEvents, err := fetchSanctionedAddressEvents(startingBlock, endingBlock)
+	newEvents, err := fetchSanctionedAddressEvents(ctx, provider, startingBlock, endingBlock)
 	if err != nil {
 		return err
 	}
 
 	newEvents = append(preFetchedEvents, newEvents...)
 
-	data, err := json.Marshal(newEvents)
-	if err != nil {
-		return err
-	}
-	_, err = file.WriteAt(data, 0)
-	if err != nil {
-		return err
-	}
-	return nil
+	err = source.SetIndex(newEvents)
+	return err
 }
 
-func fetchSanctionedAddressEvents(startingBlock uint64, endingBlock uint64) ([]sanctionedAddressEvent, error) {
-	provider, err := ethrpc.NewProvider("https://nodes.sequence.app/mainnet")
-	if err != nil {
-		return nil, err
-	}
-
+func fetchSanctionedAddressEvents(ctx context.Context, provider *ethrpc.Provider, startingBlock uint64, endingBlock uint64) ([]sanctionedAddressEvent, error) {
 	result := []sanctionedAddressEvent{}
 
 	contract := common.HexToAddress(OracleAddress)
-	logs, _, err := fetchEthereumLogs(context.Background(), provider, 10000, 8000, startingBlock, endingBlock, &contract, "0x2596d7dd6966c5673f9c06ddb0564c4f0e6d8d206ea075b83ad9ddd71a4fb927")
+	logs, _, err := fetchEthereumLogs(ctx, provider, 10000, 8000, startingBlock, endingBlock, &contract, "0x2596d7dd6966c5673f9c06ddb0564c4f0e6d8d206ea075b83ad9ddd71a4fb927")
+	if err != nil {
+		return nil, err
+	}
 
 	for _, log := range logs {
 		logData, err := ethcoder.AbiDecoderWithReturnedValues([]string{"address[]"}, log.Data)
@@ -89,22 +66,4 @@ func fetchSanctionedAddressEvents(startingBlock uint64, endingBlock uint64) ([]s
 	}
 
 	return result, nil
-}
-
-func fetchSanctionedAddressEventsFromSource(source string) ([]sanctionedAddressEvent, error) {
-	res, err := http.DefaultClient.Get(source)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-	buf, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	events := []sanctionedAddressEvent{}
-	err = json.Unmarshal(buf, &events)
-	if err != nil {
-		return nil, err
-	}
-	return events, nil
 }
