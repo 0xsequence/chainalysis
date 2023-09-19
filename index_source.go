@@ -1,5 +1,6 @@
 package chainalysis
 
+// IndexSource is an interface that allows the chainalysis package to fetch pre-indexed events
 type IndexSource interface {
 	FetchSanctionedAddressEvents() ([]sanctionedAddressEvent, error)
 

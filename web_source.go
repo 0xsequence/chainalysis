@@ -12,6 +12,8 @@ type webSource struct {
 	source string
 }
 
+// NewWebSource creates a new web source, this is the default source for the chainalysis package
+// it uses the index we have stored in index/sanctioned_addresses.json
 func NewWebSource(opSourceURL ...string) IndexSource {
 	sourceURL := DefaultWebSourceURL
 	if len(opSourceURL) > 0 {

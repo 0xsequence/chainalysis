@@ -10,6 +10,9 @@ type fileSource struct {
 	source *os.File
 }
 
+// NewFileSource creates a new file source, which implements the IndexSource interface
+// we assume this file has a similar structure to our pre-indexed json file in index/sanctioned_addresses.json
+// this can be used so that we don't have to re-index the logs from the point we left off
 func NewFileSource(sourceFile *os.File) IndexSource {
 	return &fileSource{
 		source: sourceFile,
