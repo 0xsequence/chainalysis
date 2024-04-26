@@ -36,8 +36,12 @@ type IndexSource interface {
 }
 
 type Options struct {
-	Provider *ethrpc.Provider
-	Source   IndexSource
+	// Provider, pass one of these, or else a default provider will be used.
+	ProviderURL string
+	Provider    *ethrpc.Provider
+
+	// Source to pass existing seed source, ie. like our embedded local index
+	Source IndexSource
 }
 
 type SanctionedAddressEvent struct {
@@ -70,6 +74,11 @@ func NewChainalysis(options *Options) (Chainalysis, error) {
 
 	if options.Provider != nil {
 		provider = options.Provider
+	} else if options.ProviderURL != "" {
+		provider, err = ethrpc.NewProvider(options.ProviderURL)
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		provider, err = ethrpc.NewProvider("https://nodes.sequence.app/mainnet")
 		if err != nil {
@@ -148,7 +157,8 @@ func (l *chainalysis) IsSanctioned(address string) (bool, error) {
 }
 
 func (l *chainalysis) fetcher(ctx context.Context) error {
-	ticker := time.NewTicker(5 * time.Second)
+	// fetch every 5 minutes, which is fast enough
+	ticker := time.NewTicker(5 * time.Minute)
 	defer ticker.Stop()
 
 	for {
@@ -171,6 +181,10 @@ func (l *chainalysis) fetcher(ctx context.Context) error {
 
 			sanctionedAddressesFromSource, err := fetchSanctionedAddressEvents(ctx, l.provider, lastFetchedBlockNum+1, latestBlock)
 			if err != nil {
+				continue
+			}
+
+			if len(sanctionedAddressesFromSource) == 0 {
 				continue
 			}
 
