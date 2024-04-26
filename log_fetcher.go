@@ -2,6 +2,8 @@ package chainalysis
 
 import (
 	"context"
+	"fmt"
+	"math/big"
 
 	"github.com/0xsequence/ethkit/ethcoder"
 	"github.com/0xsequence/ethkit/ethrpc"
@@ -35,11 +37,24 @@ func FetchAndUpdateSanctionedAddresses(ctx context.Context, provider *ethrpc.Pro
 	return err
 }
 
-func fetchSanctionedAddressEvents(ctx context.Context, provider *ethrpc.Provider, startingBlock uint64, endingBlock uint64) ([]sanctionedAddressEvent, error) {
-	result := []sanctionedAddressEvent{}
+func fetchSanctionedAddressEvents(ctx context.Context, provider *ethrpc.Provider, startingBlock uint64, endingBlock uint64) ([]SanctionedAddressEvent, error) {
+	result := []SanctionedAddressEvent{}
+
+	topicHash, err := ethcoder.EventTopicHash("SanctionedAddressesAdded(address[])")
+	if err != nil {
+		return nil, err
+	}
+
+	chainID, err := provider.ChainID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if chainID.Cmp(big.NewInt(OracleChainID)) != 0 {
+		return nil, fmt.Errorf("invalid chainID, expecting %d, got %d", OracleChainID, chainID)
+	}
 
 	contract := common.HexToAddress(OracleAddress)
-	logs, _, err := fetchEthereumLogs(ctx, provider, 10000, 8000, startingBlock, endingBlock, &contract, "0x2596d7dd6966c5673f9c06ddb0564c4f0e6d8d206ea075b83ad9ddd71a4fb927")
+	logs, _, err := fetchEthereumLogs(ctx, provider, 10000, 8000, startingBlock, endingBlock, &contract, topicHash.String())
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +68,7 @@ func fetchSanctionedAddressEvents(ctx context.Context, provider *ethrpc.Provider
 		if !ok {
 			return nil, err
 		}
-		event := sanctionedAddressEvent{
+		event := SanctionedAddressEvent{
 			BlockNum:  log.BlockNumber,
 			BlockHash: log.BlockHash.Hex(),
 			Addrs:     []prototyp.Hash{},

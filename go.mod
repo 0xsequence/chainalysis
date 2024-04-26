@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.22.2
 
 require (
-	github.com/0xsequence/ethkit v1.24.11
+	github.com/0xsequence/ethkit v1.24.12
 	github.com/0xsequence/go-sequence v0.30.1
 	github.com/goware/breaker v0.1.2
 	github.com/goware/logadapter-zerolog v0.2.0

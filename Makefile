@@ -3,4 +3,4 @@ build:
 
 .PHONY: update-index
 update-index:
-	@cd index && go run .
+	@cd index && echo "" > sanctioned_addresses.json && go run .

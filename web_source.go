@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-const DefaultWebSourceURL = "https://raw.githubusercontent.com/0xsequence/chainalysis/initial-version/index/sanctioned_addresses.json"
+const DefaultWebSourceURL = "https://raw.githubusercontent.com/0xsequence/chainalysis/master/index/sanctioned_addresses.json"
 
 type webSource struct {
 	source string
@@ -25,7 +25,7 @@ func NewWebSource(opSourceURL ...string) IndexSource {
 	}
 }
 
-func (w *webSource) FetchSanctionedAddressEvents() ([]sanctionedAddressEvent, error) {
+func (w *webSource) FetchSanctionedAddressEvents() ([]SanctionedAddressEvent, error) {
 	res, err := http.DefaultClient.Get(w.source)
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func (w *webSource) FetchSanctionedAddressEvents() ([]sanctionedAddressEvent, er
 	if err != nil {
 		return nil, err
 	}
-	events := []sanctionedAddressEvent{}
+	events := []SanctionedAddressEvent{}
 	err = json.Unmarshal(buf, &events)
 	if err != nil {
 		return nil, err
@@ -44,6 +44,6 @@ func (w *webSource) FetchSanctionedAddressEvents() ([]sanctionedAddressEvent, er
 }
 
 // SetIndex is no-op for the web source
-func (w *webSource) SetIndex([]sanctionedAddressEvent) error {
+func (w *webSource) SetIndex([]SanctionedAddressEvent) error {
 	return nil
 }
