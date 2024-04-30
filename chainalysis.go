@@ -3,6 +3,7 @@ package chainalysis
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -162,7 +163,7 @@ func (l *chainalysis) SanctionedAddresses() []string {
 	defer l.mu.RUnlock()
 	s := []string{}
 	for k := range l.sanctionedAddresses {
-		s = append(s, k)
+		s = append(s, strings.ToLower(k))
 	}
 	return s
 }
