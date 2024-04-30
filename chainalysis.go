@@ -101,7 +101,30 @@ func NewChainalysis(options *Options) (Chainalysis, error) {
 		provider:                provider,
 	}
 
+	// initial sync
+	err = lc.init()
+	if err != nil {
+		return nil, err
+	}
+
 	return lc, nil
+}
+
+func (l *chainalysis) init() error {
+	if len(l.sanctionedAddressEvents) > 0 {
+		return nil // skip if already initialized
+	}
+	var err error
+	l.sanctionedAddressEvents, err = l.source.FetchSanctionedAddressEvents()
+	if err != nil {
+		return err
+	}
+	for _, event := range l.sanctionedAddressEvents {
+		for _, addr := range event.Addrs {
+			l.sanctionedAddresses[addr.String()] = struct{}{}
+		}
+	}
+	return nil
 }
 
 func (l *chainalysis) Run(ctx context.Context) error {
@@ -110,16 +133,9 @@ func (l *chainalysis) Run(ctx context.Context) error {
 	}
 
 	// inital sync
-	var err error
-	l.sanctionedAddressEvents, err = l.source.FetchSanctionedAddressEvents()
+	err := l.init()
 	if err != nil {
 		return err
-	}
-
-	for _, event := range l.sanctionedAddressEvents {
-		for _, addr := range event.Addrs {
-			l.sanctionedAddresses[addr.String()] = struct{}{}
-		}
 	}
 
 	atomic.StoreInt32(&l.running, 1)
