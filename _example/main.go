@@ -30,6 +30,9 @@ func main() {
 	}
 
 	fmt.Println(chalysis.IsSanctioned("0x01e2919679362dFBC9ee1644Ba9C6da6D6245BB1"))
+	fmt.Println(chalysis.IsSanctioned("0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"))
+
+	fmt.Println("count?", len(chalysis.SanctionedAddresses()))
 
 	chalysis.Stop()
 }

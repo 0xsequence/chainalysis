@@ -24,6 +24,7 @@ type Chainalysis interface {
 	Run(ctx context.Context) error
 	Stop() error
 	IsRunning() bool
+	SanctionedAddresses() []string
 }
 
 // IndexSource is an interface that allows the chainalysis package to fetch pre-indexed events
@@ -154,6 +155,16 @@ func (l *chainalysis) IsSanctioned(address string) (bool, error) {
 	defer l.mu.RUnlock()
 	_, ok := l.sanctionedAddresses[formattedAddress]
 	return ok, nil
+}
+
+func (l *chainalysis) SanctionedAddresses() []string {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+	s := []string{}
+	for k := range l.sanctionedAddresses {
+		s = append(s, k)
+	}
+	return s
 }
 
 func (l *chainalysis) fetcher(ctx context.Context) error {
