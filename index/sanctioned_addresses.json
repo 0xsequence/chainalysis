@@ -784,5 +784,12 @@
       "0x21b8d56bda776bbe68655a16895afd96f5534fed",
       "0x175d44451403edf28469df03a9280c1197adb92c"
     ]
+  },
+  {
+    "blockNum": 19783740,
+    "blockHash": "0x308e4d31990a2a24ba8a6b2b682279eeee1280ed813f4f37c2fa3becf51bc4e6",
+    "addrs": [
+      "0x19f8f2b0915daa12a3f5c9cf01df9e24d53794f7"
+    ]
   }
 ]

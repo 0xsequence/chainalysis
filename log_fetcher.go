@@ -40,7 +40,7 @@ func FetchAndUpdateSanctionedAddresses(ctx context.Context, provider *ethrpc.Pro
 func fetchSanctionedAddressEvents(ctx context.Context, provider *ethrpc.Provider, startingBlock uint64, endingBlock uint64) ([]SanctionedAddressEvent, error) {
 	result := []SanctionedAddressEvent{}
 
-	topicHash, err := ethcoder.EventTopicHash("SanctionedAddressesAdded(address[])")
+	topicHash, _, err := ethcoder.EventTopicHash("SanctionedAddressesAdded(address[])")
 	if err != nil {
 		return nil, err
 	}
