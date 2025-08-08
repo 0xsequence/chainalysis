@@ -1,7 +1,6 @@
 package chainalysis
 
 import (
-	"cmp"
 	"context"
 	"errors"
 	"log/slog"
@@ -87,13 +86,4 @@ func fetchEthereumLogs(ctx context.Context, provider ethrpc.Interface, maxBatchS
 
 func tooMuchDataRequestedError(err error) bool {
 	return strings.Contains(err.Error(), "query returned more than")
-}
-
-func min[T cmp.Ordered](x T, y ...T) T {
-	for _, v := range y {
-		if v < x {
-			x = v
-		}
-	}
-	return x
 }
