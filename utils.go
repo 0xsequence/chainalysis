@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"context"
 	"errors"
+	"log/slog"
 	"math/big"
 	"strings"
 	"time"
@@ -13,8 +14,6 @@ import (
 	"github.com/0xsequence/ethkit/go-ethereum/common"
 	"github.com/0xsequence/ethkit/go-ethereum/core/types"
 	"github.com/goware/breaker"
-	"github.com/goware/logadapter-zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 func fetchEthereumLogs(ctx context.Context, provider ethrpc.Interface, maxBatchSize, lastBatchSize, from, to uint64, optContractFilter *common.Address, topicID string) ([]types.Log, uint64, error) {
@@ -23,7 +22,7 @@ func fetchEthereumLogs(ctx context.Context, provider ethrpc.Interface, maxBatchS
 	batchSize := lastBatchSize
 	additiveFactor := uint64(float64(batchSize) * 0.10)
 
-	br := breaker.New(logadapter.LogAdapter(log.Logger), time.Second*2, 2, 5)
+	br := breaker.New(slog.Default(), time.Second*2, 2, 5)
 
 	for i := from; i < to; {
 		dst := min(i+batchSize, to)
@@ -46,16 +45,16 @@ func fetchEthereumLogs(ctx context.Context, provider ethrpc.Interface, maxBatchS
 			logs, err = provider.FilterLogs(ctx, query)
 			if err != nil {
 				if tooMuchDataRequestedError(err) {
-					log.Warn().Msgf("fetchEthereumLogs hit too-much-data error for batchSize %d", batchSize)
+					slog.Warn("fetchEthereumLogs hit too-much-data error", "batchSize", batchSize)
 					batchSize = uint64(float64(batchSize) / 1.5)
 					return err
 				}
 
 				if !errors.Is(err, context.Canceled) {
-					log.Err(err).Msgf("fetchEthereumLogs failed")
+					slog.Error("fetchEthereumLogs failed", "error", err)
 				}
 
-				log.Warn().Msgf("fetchEthereumLogs error '%v'", err)
+				slog.Warn("fetchEthereumLogs error", "error", err)
 				return err
 			}
 			return nil
@@ -81,7 +80,7 @@ func fetchEthereumLogs(ctx context.Context, provider ethrpc.Interface, maxBatchS
 		}
 	}
 
-	log.Debug().Msgf("fetchEthereumLogs from block %d to %d retrieved %d logs", from, to, len(result))
+	slog.Debug("fetchEthereumLogs completed", "fromBlock", from, "toBlock", to, "logCount", len(result))
 
 	return result, batchSize, nil
 }

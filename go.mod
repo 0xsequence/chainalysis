@@ -8,8 +8,6 @@ require (
 	github.com/0xsequence/ethkit v1.38.0
 	github.com/0xsequence/go-sequence v0.56.0
 	github.com/goware/breaker v0.2.0
-	github.com/goware/logadapter-zerolog v0.2.0
-	github.com/rs/zerolog v1.32.0
 )
 
 require (
@@ -25,11 +23,8 @@ require (
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
-	github.com/goware/logger v0.3.0 // indirect
 	github.com/goware/superr v0.0.2 // indirect
 	github.com/holiman/uint256 v1.3.2 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mmcloughlin/addchain v0.4.0 // indirect
 	github.com/supranational/blst v0.3.14 // indirect
 	golang.org/x/crypto v0.38.0 // indirect
