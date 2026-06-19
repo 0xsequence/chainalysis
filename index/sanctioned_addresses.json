@@ -871,5 +871,21 @@
       "0xd5ed34b52ac4ab84d8fa8a231a3218bbf01ed510",
       "0x12de548f79a50d2bd05481c8515c1ef5183666a9"
     ]
+  },
+  {
+    "blockNum": 24687198,
+    "blockHash": "0xa5139626a3a04b78a4d4bb7b39a33bd576f4421a1aebfba69554178e4288124a",
+    "addrs": [
+      "0xfda1ec4a6178d4916b001a065422d31ebe5f62ff",
+      "0xcb74874f1e06fcf80a306e06e5379a44b488ba2d",
+      "0x95584c303fcd48af5c6b9873015f2ad0ca84eae3",
+      "0x9be599d7867f5e1a2d7ec6db9710df2b98a15573",
+      "0x76ea76ca4eb727f18956ab93445a94c5280412b9",
+      "0x0330070fd38ec3bb94f58fa55d40368271e9e54a",
+      "0x747afb5c7a7fc34b547cd0fdebf9b91759c5a52b",
+      "0xd04e33461fea8302c5e1e13895b60cee8aefda7f",
+      "0xb637f84b66876ebf609c2a4208905f9ddac9d075",
+      "0xfb3eff152ea55d1bfa04dbdd509a80fd7b72cdeb"
+    ]
   }
 ]
